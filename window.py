@@ -1,10 +1,16 @@
 import sys
-import json
+from helpers import show_message_box
 from PySide2 import QtCore, QtWidgets, QtGui
 
 
-class AdParserWindow(QtWidgets.QWidget):
-    def __init__(self):
+class Window(QtWidgets.QWidget):
+    on_about_start = QtCore.Signal(list, list, int, int, int)
+    on_about_stop = QtCore.Signal()
+
+    SEARCH_ENGINE_YANDEX = 0
+    SEARCH_ENGINE_GOOGLE = 1
+
+    def __init__(self, settings_map):
         super().__init__()
 
         # city name => city code
@@ -13,18 +19,20 @@ class AdParserWindow(QtWidgets.QWidget):
         # list of check boxes with associated city codes
         self.__cities_check_boxes = {}
 
-        self.__initialize()
+        self.__initialize(settings_map)
 
-    def __initialize(self):
-        self.__initialize_cities_map()
+    def __initialize(self, settings_map):
+        self.__initialize_cities_map(settings_map)
         self.__create_ads_count_layout()
         self.__create_pause_time_layout()
         self.__create_cities_widget()
         self.__create_start_stop_layout()
         self.__create_keys_text_edit_layout()
+        self.__create_search_engine_selection_layout()
         self.__layout = QtWidgets.QVBoxLayout()
         self.__layout.addLayout(self.__ads_count_layout)
         self.__layout.addLayout(self.__pause_time_layout)
+        self.__layout.addLayout(self.__search_engine_selection_layout)
         self.__layout.addWidget(self.__cities_scroll_area)
         self.__layout.addLayout(self.__keys_text_edit_layout)
         self.__layout.addLayout(self.__start_stop_layout)
@@ -49,6 +57,15 @@ class AdParserWindow(QtWidgets.QWidget):
         self.__pause_time_spin_box.setValue(2000)
         self.__pause_time_layout.addWidget(pause_time_label)
         self.__pause_time_layout.addWidget(self.__pause_time_spin_box)
+
+    def __create_search_engine_selection_layout(self):
+        self.__search_engine_selection_layout = QtWidgets.QHBoxLayout()
+        text_label = QtWidgets.QLabel('Поисковая система:')
+        self.__search_engine_combo_box = QtWidgets.QComboBox()
+        self.__search_engine_combo_box.addItem('Яндекс', self.SEARCH_ENGINE_YANDEX)
+        self.__search_engine_combo_box.addItem('Google', self.SEARCH_ENGINE_GOOGLE)
+        self.__search_engine_selection_layout.addWidget(text_label)
+        self.__search_engine_selection_layout.addWidget(self.__search_engine_combo_box)
 
     def __create_cities_widget(self):
         self.__cities_widget = QtWidgets.QWidget(self)
@@ -79,56 +96,35 @@ class AdParserWindow(QtWidgets.QWidget):
         self.__keys_text_edit_layout.addWidget(keys_text_edit_label)
         self.__keys_text_edit_layout.addWidget(self.__keys_text_edit)
 
-    def __initialize_cities_map(self):
-        with open('settings.json', 'r') as settings_file:
-            settings_map = json.load(settings_file)
-
-            for city in settings_map['cities']:
-                for name, code in city.items():
-                    self.__cities[name] = code
+    def __initialize_cities_map(self, settings_map):
+        for city in settings_map['cities']:
+            for name, code in city.items():
+                self.__cities[name] = code
 
     def __start(self):
         phrases = self.__keys_text_edit.toPlainText().strip()
 
         if not phrases:
-            message_box = QtWidgets.QMessageBox(self)
-            message_box.setText('Не задана ни одна ключевая фраза')
-            message_box.exec()
+            show_message_box(self, 'Не задана ни одна ключевая фраза')
+            return
 
         phrases = phrases.split('\n')
 
+        codes = []
+
         for code, checkbox in self.__cities_check_boxes.items():
             if checkbox.isChecked():
-                print(code)
+                codes.append(code)
+
+        if not codes:
+            show_message_box(self, 'Не выбран ни один регион для поиска объявлений')
+            return
+
+        search_engine_code = self.__search_engine_combo_box.itemData(self.__search_engine_combo_box.currentIndex())
+        ads_count_for_one_key = self.__ads_count_spin_box.value()
+        pause_time_between_requests = self.__pause_time_spin_box.value()
+        self.on_about_start.emit(phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests)
 
     @staticmethod
     def __stop():
-        print('Stop')
-
-
-def main():
-    app = QtWidgets.QApplication([])
-
-    widget = AdParserWindow()
-    widget.show()
-    widget.adjustSize()
-
-    sys.exit(app.exec_())
-
-
-def prepare():
-    result = {}
-
-    with open('regions.txt', 'r') as regions:
-        data = regions.read()
-        data = data.split('\n')
-
-        for i in range(len(data) - 1):
-            result[int(data[i].encode('utf-8'))] = data[i + 1].strip()
-
-    with open('settings_.json', 'w') as settings:
-        json.dump(result, settings)
-
-
-if __name__ == '__main__':
-    main()
+        self.on_about_stop.emit()
