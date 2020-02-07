@@ -2,10 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="7d5f72b4-de73-4e55-943c-d1442fbcd346" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ad_parser.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/window.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirments.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirments.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parsers/parse_configurations/yandex_ru" beforeDir="false" afterPath="$PROJECT_DIR$/parsers/parse_configurations/yandex_ru" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parsers/yandex_parser.py" beforeDir="false" afterPath="$PROJECT_DIR$/parsers/yandex_parser.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -129,5 +128,16 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Updated README.md." />
     <option name="LAST_COMMIT_MESSAGE" value="Updated README.md." />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/parsers/yandex_parser.py</url>
+          <line>11</line>
+          <option name="timeStamp" value="11" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
