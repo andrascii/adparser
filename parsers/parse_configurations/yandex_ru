@@ -1,6 +1,0 @@
-{
-	"name": "yandex.ru",
-	"base_url": "https://yandex.ru/search/ads",
-	"key_phrase_variable": "text",
-	"city_code_variable": "lr"
-}

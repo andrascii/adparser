@@ -1,6 +1,5 @@
-import sys
 from helpers import show_message_box
-from PySide2 import QtCore, QtWidgets, QtGui
+from PySide2 import QtCore, QtWidgets
 
 
 class Window(QtWidgets.QWidget):
@@ -125,6 +124,5 @@ class Window(QtWidgets.QWidget):
         pause_time_between_requests = self.__pause_time_spin_box.value()
         self.on_about_start.emit(phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests)
 
-    @staticmethod
-    def __stop():
+    def __stop(self):
         self.on_about_stop.emit()

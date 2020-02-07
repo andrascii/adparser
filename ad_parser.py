@@ -1,27 +1,33 @@
 import sys
 import json
-import urllib.parse
+import logging
 from window import Window
-from PySide2 import QtCore, QtWidgets, QtGui
-from iloader import ILoader
-from loader_factory import LoaderFactory
+from helpers import show_message_box
+from parsers.yandex_parser import YandexParser
+from PySide2 import QtWidgets
+
+logging.basicConfig(filename="ad_parser.log", level=logging.INFO)
 
 
 def on_start(phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests):
-    print(phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests)
-    factory = LoaderFactory(True)
-    loader = factory.create()
-    result = loader.load_page('https://yandex.ru/search/ads?' + urllib.parse.urlencode({'text': 'авиабилеты', 'lr': 213}))
-    print(result)
+    if search_engine_code == Window.SEARCH_ENGINE_YANDEX:
+        ad_parser = YandexParser(phrases, codes, ads_count_for_one_key, pause_time_between_requests)
+    else:
+        ad_parser = None
+
+    if ad_parser:
+        ad_parser.start()
+
 
 def on_stop():
     pass
 
 
 def main():
-    app = QtWidgets.QApplication([])
+    logger = logging.getLogger(__name__)
+    logger.info('AdParser started')
 
-    settings_map = None
+    app = QtWidgets.QApplication([])
 
     with open('settings.json', 'r') as settings_file:
         settings_map = json.load(settings_file)
@@ -36,7 +42,9 @@ def main():
     window.show()
     window.adjustSize()
 
-    sys.exit(app.exec_())
+    exit_code = app.exec_()
+    logger.info('AdParser closed')
+    sys.exit(exit_code)
 
 
 if __name__ == '__main__':
