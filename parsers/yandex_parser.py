@@ -2,6 +2,7 @@ import psutil
 import urllib.parse
 import logging
 import time
+from data_collector import DataCollector
 from parsers.parser_base import ParserBase
 from selenium.common.exceptions import WebDriverException, NoSuchElementException
 from web_driver_factory import WebDriverFactory
@@ -31,6 +32,8 @@ class YandexParser(ParserBase):
 
     def start(self):
         for phrase in self.__phrases:
+            result = []
+
             for city_code in self.__city_codes:
                 variables = {
                     YandexParser.TEXT_VARIABLE_NAME: phrase,
@@ -38,8 +41,6 @@ class YandexParser(ParserBase):
                 }
 
                 self.__load_url(YandexParser.BASE_URL + '?' + urllib.parse.urlencode(variables))
-
-                result = []
 
                 def parse_ads_city_phrase_loop():
                     nonlocal result
@@ -61,9 +62,11 @@ class YandexParser(ParserBase):
                                 break
 
                 parse_ads_city_phrase_loop()
-                result = self._remove_duplicated_hosts(result)
-                # store to .CSV file
                 self.__logger.info(result)
+
+            result = self._remove_duplicated_hosts(result)
+            DataCollector.store(phrase, 123, result)
+            # store to .CSV file
 
     def __parse_loaded_page(self, parse_count):
         try:
