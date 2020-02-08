@@ -65,8 +65,7 @@ class YandexParser(ParserBase):
                 self.__logger.info(result)
 
             result = self._remove_duplicated_hosts(result)
-            DataCollector.store(phrase, 123, result)
-            # store to .CSV file
+            DataCollector.store(phrase, result)
 
     def __parse_loaded_page(self, parse_count):
         try:
@@ -135,7 +134,7 @@ class YandexParser(ParserBase):
         ad_lines = ad.text.strip().split('\n')
 
         if ad_lines:
-            return ad_lines[0]
+            return YandexParser.__replace_special_chars(ad_lines[0])
 
         return None
 
@@ -146,11 +145,19 @@ class YandexParser(ParserBase):
 
     @staticmethod
     def __replace_special_chars(text):
-        return text.replace(';', ' ').replace('\n', ' ').replace('"', ' ').replace(',', ' ')
+        return text.replace(';', ' ')\
+            .replace('\n', ' ')\
+            .replace('"', ' ')\
+            .replace(',', ' ')
 
     @staticmethod
     def __prepare_phone_number(phone_number):
-        return phone_number.replace('-', '').replace(' ', '').replace('(', '').replace(')', '').replace('+', '')
+        return phone_number.replace('-', '')\
+            .replace(' ', '')\
+            .replace('(', '')\
+            .replace(')', '')\
+            .replace('+', '')\
+            .replace(',', ' ')
 
     @staticmethod
     def __try_parse_phone_number(self, ad):
