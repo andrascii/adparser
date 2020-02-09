@@ -1,6 +1,7 @@
 import sys
 import json
 import logging
+import threading
 from window import Window
 from helpers import show_message_box
 from parsers.yandex_parser import YandexParser
@@ -9,18 +10,33 @@ from PySide2 import QtWidgets
 logging.basicConfig(filename="ad_parser.log", level=logging.INFO)
 
 
-def on_start(phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests):
-    if search_engine_code == Window.SEARCH_ENGINE_YANDEX:
-        ad_parser = YandexParser(phrases, codes, ads_count_for_one_key, pause_time_between_requests)
-    else:
-        ad_parser = None
+class Parser:
+    def __init__(self):
+        self.__active_parser = None
+        self.__active_thread = None
 
-    if ad_parser:
-        ad_parser.start()
+    def on_start(self, phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests):
+        if self.__active_parser:
+            show_message_box(None, 'Парсер уже запущен')
+            return
 
+        if search_engine_code == Window.SEARCH_ENGINE_YANDEX:
+            self.__active_parser = YandexParser(phrases, codes, ads_count_for_one_key, pause_time_between_requests)
+        else:
+            self.__active_parser = None
 
-def on_stop():
-    pass
+        if self.__active_parser:
+            self.__active_thread = threading.Thread(target=self.__active_parser.start)
+            self.__active_thread.start()
+
+    def on_stop(self):
+        if not self.__active_parser or not self.__active_thread:
+            return
+        self.__active_parser.stop()
+        self.__active_thread.join()
+        self.__active_parser = None
+        self.__active_thread = None
+
 
 
 def main():
@@ -36,9 +52,11 @@ def main():
         show_message_box(None, 'Не найден файл настроек settings.json или он пуст')
         return
 
+    parser = Parser()
+
     window = Window(settings_map)
-    window.on_about_start.connect(on_start)
-    window.on_about_stop.connect(on_stop)
+    window.on_about_start.connect(parser.on_start)
+    window.on_about_stop.connect(parser.on_stop)
     window.show()
     window.adjustSize()
 

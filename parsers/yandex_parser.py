@@ -2,9 +2,10 @@ import psutil
 import urllib.parse
 import logging
 import time
+import threading
 from data_collector import DataCollector
 from parsers.parser_base import ParserBase
-from selenium.common.exceptions import WebDriverException, NoSuchElementException
+from selenium.common.exceptions import WebDriverException, NoSuchElementException, NoSuchWindowException
 from web_driver_factory import WebDriverFactory
 
 
@@ -15,6 +16,9 @@ class YandexParser(ParserBase):
 
     def __init__(self, phrases, city_codes, ads_count_for_one_key, pause_time_between_requests):
         ParserBase.__init__(self)
+
+        self.__lock = threading.Lock()
+        self.__need_to_stop_flag = False
 
         self.__logger = logging.getLogger(__name__)
 
@@ -31,10 +35,16 @@ class YandexParser(ParserBase):
         self.__run_browser()
 
     def start(self):
+        with self.__lock:
+            self.__need_to_stop_flag = False
+
         for phrase in self.__phrases:
             result = []
 
             for city_code in self.__city_codes:
+                if self.__need_to_stop():
+                    break
+
                 variables = {
                     YandexParser.TEXT_VARIABLE_NAME: phrase,
                     YandexParser.CITY_CODE_VARIABLE_NAME: city_code
@@ -66,6 +76,16 @@ class YandexParser(ParserBase):
 
             result = self._remove_duplicated_hosts(result)
             DataCollector.store(phrase, result)
+
+    def stop(self):
+        with self.__lock:
+            self.__need_to_stop_flag = True
+            del self.__driver
+            self.__driver = None
+
+    def __need_to_stop(self):
+        with self.__lock:
+            return self.__need_to_stop_flag
 
     def __parse_loaded_page(self, parse_count):
         try:
