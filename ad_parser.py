@@ -45,7 +45,7 @@ def main():
 
     app = QtWidgets.QApplication([])
 
-    with open('settings.json', 'r') as settings_file:
+    with open('settings.json', 'r', encoding='utf-8') as settings_file:
         settings_map = json.load(settings_file)
 
     if not settings_map:
