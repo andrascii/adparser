@@ -19,9 +19,13 @@ class WebDriverFactory:
 
     @staticmethod
     def __create_chrome_driver(headless: bool):
+        chrome_user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' \
+                            'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.130 Safari/537.36'
+
         capabilities = DesiredCapabilities.CHROME
         capabilities['loggingPrefs'] = {'performance': 'ALL'}
         options = webdriver.ChromeOptions()
+        options.add_argument('User-Agent: ' + chrome_user_agent)
 
         if headless is True:
             options.add_argument('--headless')

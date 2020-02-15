@@ -5,6 +5,7 @@ import threading
 from window import Window
 from helpers import show_message_box
 from parsers.yandex_parser import YandexParser
+from parsers.yandex_wordstat_parser import YandexWordstatParser
 from PySide2 import QtWidgets
 
 logging.basicConfig(filename="ad_parser.log", level=logging.INFO)
@@ -15,13 +16,16 @@ class Parser:
         self.__active_parser = None
         self.__active_thread = None
 
-    def on_start(self, phrases, codes, search_engine_code, ads_count_for_one_key, pause_time_between_requests):
+    def on_start(self, phrases, codes, search_engine_code, ads_count_for_one_key,
+                 pause_time_between_requests, login, password):
         if self.__active_parser:
             show_message_box(None, 'Парсер уже запущен')
             return
 
         if search_engine_code == Window.SEARCH_ENGINE_YANDEX:
             self.__active_parser = YandexParser(phrases, codes, ads_count_for_one_key, pause_time_between_requests)
+        elif search_engine_code == Window.SEARCH_ENGINE_YANDEX_WORDSTAT:
+            self.__active_parser = YandexWordstatParser(phrases, login, password)
         else:
             self.__active_parser = None
 
@@ -36,7 +40,6 @@ class Parser:
         self.__active_thread.join()
         self.__active_parser = None
         self.__active_thread = None
-
 
 
 def main():

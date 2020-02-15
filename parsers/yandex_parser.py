@@ -32,11 +32,12 @@ class YandexParser(ParserBase):
         self.__ads_count_for_one_key: int = ads_count_for_one_key
         self.__pause_time_between_requests: int = pause_time_between_requests
         self.__driver = None
-        self.__run_browser()
 
     def start(self):
         with self.__lock:
             self.__need_to_stop_flag = False
+
+        self.__run_browser()
 
         for phrase in self.__phrases:
             result = []
@@ -76,6 +77,9 @@ class YandexParser(ParserBase):
 
             result = self._remove_duplicated_hosts(result)
             DataCollector.store(phrase, result)
+
+        self.__driver.quit()
+        self.__driver = None
 
     def stop(self):
         with self.__lock:

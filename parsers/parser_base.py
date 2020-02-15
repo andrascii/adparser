@@ -17,3 +17,5 @@ class ParserBase:
             dictionary[item['url']] = item
 
         return list(dictionary.values())
+
+
