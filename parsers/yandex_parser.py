@@ -76,7 +76,7 @@ class YandexParser(ParserBase):
                 self.__logger.info(result)
 
             result = self._remove_duplicated_hosts(result)
-            DataCollector.store(phrase, result)
+            DataCollector.store_ad_search_data('YandexParser', phrase, result)
 
         self.__driver.quit()
         self.__driver = None

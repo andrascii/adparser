@@ -3,3 +3,4 @@ __pycache__/
 .idea/
 ad_parser.log
 data/
+chromedriver*
