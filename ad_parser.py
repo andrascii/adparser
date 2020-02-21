@@ -18,8 +18,7 @@ class Parser:
 
     def on_start(self, phrases, codes, search_engine_code, ads_count_for_one_key,
                  pause_time_between_requests, login, password):
-        if self.__active_parser:
-            show_message_box(None, 'Парсер уже запущен')
+        if not self.__start_or_inform():
             return
 
         if search_engine_code == Window.SEARCH_ENGINE_YANDEX:
@@ -40,6 +39,19 @@ class Parser:
         self.__active_thread.join()
         self.__active_parser = None
         self.__active_thread = None
+
+    def __start_or_inform(self):
+        if not self.__active_parser:
+            return True
+
+        if self.__active_thread.is_alive():
+            show_message_box(None, 'Парсер уже запущен')
+            return False
+
+        self.__active_thread = None
+        self.__active_thread = None
+
+        return True
 
 
 def main():
