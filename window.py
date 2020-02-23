@@ -168,14 +168,8 @@ class Window(QtWidgets.QWidget):
         search_engine = self.__selected_search_engine()
 
         if search_engine == Window.SEARCH_ENGINE_YANDEX_WORDSTAT:
-            self.__cities_scroll_area.hide()
-            self.__ads_count_widget.hide()
-            self.__pause_time_widget.hide()
             self.__auth_fields_widget.show()
         else:
-            self.__cities_scroll_area.show()
-            self.__ads_count_widget.show()
-            self.__pause_time_widget.show()
             self.__auth_fields_widget.hide()
 
     def __selected_search_engine(self):
