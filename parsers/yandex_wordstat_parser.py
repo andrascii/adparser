@@ -10,12 +10,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 from selenium.common.exceptions import WebDriverException, TimeoutException
 from web_driver_factory import WebDriverFactory
+from PySide2 import QtCore
 
 
-class YandexWordstatParser(ParserBase):
+class YandexWordstatParser(QtCore.QObject, ParserBase):
+    on_completed = QtCore.Signal()
+
     BASE_URL = 'https://wordstat.yandex.ru'
 
     def __init__(self, phrases, login, password):
+        super(YandexWordstatParser, self).__init__()
         ParserBase.__init__(self)
 
         self.__lock = threading.Lock()
@@ -66,6 +70,7 @@ class YandexWordstatParser(ParserBase):
             YandexWordstatParser.__random_wait(3000, 15000)
 
         self.__driver.quit()
+        self.on_completed.emit()
 
     def stop(self):
         with self.__lock:

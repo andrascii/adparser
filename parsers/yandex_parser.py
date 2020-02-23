@@ -7,14 +7,19 @@ from data_collector import DataCollector
 from parsers.parser_base import ParserBase
 from selenium.common.exceptions import WebDriverException, NoSuchElementException, NoSuchWindowException
 from web_driver_factory import WebDriverFactory
+from PySide2 import QtCore
+from PySide2.QtCore import Slot
 
 
-class YandexParser(ParserBase):
+class YandexParser(QtCore.QObject, ParserBase):
+    on_completed = QtCore.Signal()
+
     BASE_URL = 'https://yandex.ru/search/ads'
     TEXT_VARIABLE_NAME = 'text'
     CITY_CODE_VARIABLE_NAME = 'lr'
 
     def __init__(self, phrases, city_codes, ads_count_for_one_key, pause_time_between_requests):
+        super(YandexParser, self).__init__()
         ParserBase.__init__(self)
 
         self.__lock = threading.Lock()
@@ -33,6 +38,7 @@ class YandexParser(ParserBase):
         self.__pause_time_between_requests: int = pause_time_between_requests
         self.__driver = None
 
+    @Slot()
     def start(self):
         with self.__lock:
             self.__need_to_stop_flag = False
@@ -79,7 +85,7 @@ class YandexParser(ParserBase):
             DataCollector.store_ad_search_data('YandexParser', phrase, result)
 
         self.__driver.quit()
-        self.__driver = None
+        self.on_completed.emit()
 
     def stop(self):
         with self.__lock:
