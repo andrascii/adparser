@@ -1,4 +1,5 @@
-import threading
+import os
+import csv
 from window import Window
 from helpers import show_message_box
 from parsers.yandex_parser import YandexParser
@@ -22,6 +23,9 @@ class ParserStarter(QtCore.QObject):
         self.__pause_between_requests = None
         self.__login = None
         self.__password = None
+
+    def __del__(self):
+        self.on_stop_clicked()
 
     def on_start_clicked(self, phrases, codes, search_engine_code, ads_count_for_one_key,
                          pause_time_between_requests, login, password):
@@ -60,6 +64,15 @@ class ParserStarter(QtCore.QObject):
             return
 
         self.__search_engine = Window.SEARCH_ENGINE_YANDEX
+
+        print('phrases before')
+        print(self.__phrases)
+
+        self.__phrases = ParserStarter.__read_wordstat_phrases()
+        self.__remove_folder('data/wordstat/')
+
+        print('phrases before')
+        print(self.__phrases)
 
         self.__create_and_start_parser(
             self.__phrases,
@@ -102,3 +115,27 @@ class ParserStarter(QtCore.QObject):
         self.__active_thread = None
 
         return True
+
+    @staticmethod
+    def __read_wordstat_phrases():
+        result = []
+        with os.scandir('data/wordstat') as entries:
+            for entry in entries:
+                if entry.is_file():
+                    with open('data/wordstat/' + entry.name, 'r', encoding='utf-8') as csv_file:
+                        csv_reader = csv.reader(csv_file, delimiter=',', quotechar='|', quoting=csv.QUOTE_MINIMAL)
+                        for row in csv_reader:
+                            result.append(row[0])
+
+        return result
+
+    @staticmethod
+    def __remove_folder(folder):
+        with os.scandir(folder) as entries:
+            for entry in entries:
+                if entry.is_file():
+                    os.remove(entry)
+                elif entry.is_folder():
+                    ParserStarter.__remove_folder(entry)
+
+        os.rmdir(folder)
