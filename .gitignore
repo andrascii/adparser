@@ -4,3 +4,12 @@ __pycache__/
 ad_parser.log
 data/
 chromedriver*
+.idea/
+_windows/
+codestyles/
+colors.scheme.xml
+debugger.xml
+github.xml
+ide.general.xml
+inspection/
+wsl.distributions.xml
